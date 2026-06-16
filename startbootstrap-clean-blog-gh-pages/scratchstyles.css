@@ -1,0 +1,123 @@
+body {
+    background-color: #cdeffd;
+    font-family: Arial, sans-serif;
+    color: #1a3c5e;
+}
+
+h1 {
+    color: #d2691e;
+    text-align: center;
+}
+
+p {
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+a {
+    color: #008080;
+}
+
+.intro {
+    text-align: center;
+    padding: 20px;
+}
+
+.activities {
+    background-color: #ffffff;
+    padding: 20px;
+    margin: 20px;
+    border-radius: 10px;
+}
+
+.footer {
+    text-align: center;
+    padding: 15px;
+    font-style: italic;
+}
+
+.intro {
+    text-align: center;
+    padding: 20px;
+}
+
+.activities {
+    background-color: #ffffff;
+    padding: 20px;
+    margin: 20px;
+    border-radius: 10px;
+}
+
+.footer {
+    text-align: center;
+    padding: 15px;
+    font-style: italic;
+}
+
+.tableau { padding: 20px; }
+
+.intro img {
+    width: 45%;
+    height: 320px;
+    object-fit: cover;
+    object-position: center 75%;
+    border-radius: 12px;
+    margin: 8px;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.2);
+}
+
+.intro p {
+    font-weight: bold;
+}
+
+/* center all the section headings */
+h2 {
+    text-align: center;
+    margin-top: 40px;
+}
+
+/* style the top navigation bar */
+.topnav {
+    text-align: center;
+    padding: 14px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* give the whole page a comfortable reading width, centered */
+body {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.topnav a {
+    text-decoration: none;
+}
+
+/* the big page title */
+h1 {
+    font-family: "Georgia", serif;
+    font-size: 52px;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    color: #0d3a4a;
+}
+
+/* the section headers */
+h2 {
+    font-family: "Georgia", serif;
+    color: #066b8c;
+    border-bottom: 3px solid #ffd23f;
+    padding-bottom: 8px;
+    display: inline-block;
+}
+
+.topnav {
+    background-color: #066b8c;
+    border-radius: 10px;
+    margin: 10px;
+}
+
+.topnav a {
+    color: #ffffff;
+}

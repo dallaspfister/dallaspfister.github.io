@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catch of the Day - A Panama City Beach Game</title>
+
+<style>
+/* ===========================================================
+   CATCH OF THE DAY  -  styles
+   The whole look of the game lives here.
+   Colors are written as #hex codes you can swap freely.
+   =========================================================== */
+
+:root {
+    --sky:    #bfeaf5;   /* pale sky blue          */
+    --sea1:   #2a9fb8;   /* top of the water       */
+    --sea2:   #066b8c;   /* deeper water           */
+    --sand:   #f3e2b3;   /* beach sand             */
+    --foam:   #fdfdfb;   /* white foam / cards     */
+    --ink:    #0d3a4a;   /* dark text              */
+    --sun:    #ffd23f;   /* sunshine yellow accent */
+    --coral:  #ff7a59;   /* buttons / highlights   */
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    padding: 24px 16px;
+    font-family: "Trebuchet MS", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+    color: var(--ink);
+    background: linear-gradient(180deg, var(--sky) 0%, #8fd3e0 100%);
+}
+
+h1 {
+    margin: 0;
+    font-size: clamp(28px, 6vw, 44px);
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 0 rgba(255,255,255,0.6);
+}
+
+.tagline {
+    margin: 0;
+    font-size: 16px;
+    opacity: 0.8;
+}
+
+/* --- the scoreboard --- */
+.hud {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.hud .stat {
+    background: var(--foam);
+    border-radius: 14px;
+    padding: 10px 18px;
+    min-width: 90px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(13,58,74,0.15);
+}
+
+.hud .stat span {
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.7;
+}
+
+.hud .stat strong {
+    font-size: 26px;
+}
+
+/* --- the play area (the ocean) --- */
+#ocean {
+    position: relative;
+    width: min(680px, 96vw);
+    height: 440px;
+    border-radius: 20px;
+    overflow: hidden;
+    cursor: crosshair;
+    background:
+        linear-gradient(180deg, var(--sea1) 0%, var(--sea2) 85%, #044b63 100%);
+    box-shadow: 0 14px 30px rgba(13,58,74,0.35), inset 0 0 60px rgba(0,0,0,0.15);
+    user-select: none;
+}
+
+/* the sun in the corner */
+#ocean::before {
+    content: "";
+    position: absolute;
+    top: 22px; right: 30px;
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: var(--sun);
+    box-shadow: 0 0 40px 12px rgba(255,210,63,0.6);
+}
+
+/* a strip of sand along the bottom */
+#ocean::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 26px;
+    background: var(--sand);
+}
+
+/* each sea creature that swims by */
+.critter {
+    position: absolute;
+    font-size: 42px;
+    line-height: 1;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    padding: 4px;
+    transition: transform 0.08s ease;
+}
+.critter:hover { transform: scale(1.15); }
+.critter:active { transform: scale(0.85); }
+
+/* the little "+1" that pops up when you catch something */
+.popup {
+    position: absolute;
+    font-weight: bold;
+    font-size: 22px;
+    pointer-events: none;
+    animation: floatUp 0.7s ease-out forwards;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+@keyframes floatUp {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(-40px); }
+}
+
+/* the start + game-over screens that cover the ocean */
+.overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    text-align: center;
+    padding: 20px;
+    background: rgba(6,75,99,0.78);
+    color: var(--foam);
+    backdrop-filter: blur(2px);
+}
+.overlay.hidden { display: none; }
+.overlay h2 { margin: 0; font-size: 30px; }
+.overlay p  { margin: 0; max-width: 420px; line-height: 1.5; }
+
+button.play {
+    font-family: inherit;
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--ink);
+    background: var(--sun);
+    border: none;
+    border-radius: 999px;
+    padding: 12px 30px;
+    cursor: pointer;
+    box-shadow: 0 5px 0 #d9a800;
+    transition: transform 0.1s ease;
+}
+button.play:hover  { transform: translateY(-2px); }
+button.play:active { transform: translateY(3px); box-shadow: 0 2px 0 #d9a800; }
+
+.legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    font-size: 15px;
+    background: var(--foam);
+    padding: 10px 16px;
+    border-radius: 14px;
+    box-shadow: 0 4px 10px rgba(13,58,74,0.15);
+}
+
+.backlink {
+    color: var(--ink);
+    font-weight: bold;
+    text-decoration: none;
+    border-bottom: 2px solid var(--coral);
+}
+.backlink:hover { color: var(--coral); }
+
+/* be kind to people who prefer less motion */
+@media (prefers-reduced-motion: reduce) {
+    .popup { animation: none; }
+}
+</style>
+</head>
+
+<body>
+
+    <h1>🎣 Catch of the Day</h1>
+    <p class="tagline">Panama City Beach &mdash; how many can you reel in?</p>
+
+    <div class="hud">
+        <div class="stat"><span>Score</span><strong id="score">0</strong></div>
+        <div class="stat"><span>Time</span><strong id="time">30</strong></div>
+        <div class="stat"><span>Best</span><strong id="best">0</strong></div>
+    </div>
+
+    <div id="ocean">
+        <!-- Start screen -->
+        <div class="overlay" id="startScreen">
+            <h2>Ready to fish?</h2>
+            <p>Tap the fish to catch them before they swim away.
+               Watch out &mdash; jellyfish and crabs will cost you points!</p>
+            <button class="play" id="startBtn">Start Fishing</button>
+        </div>
+
+        <!-- Game over screen -->
+        <div class="overlay hidden" id="endScreen">
+            <h2 id="endTitle">Time's up!</h2>
+            <p id="endMsg">You caught a great haul.</p>
+            <button class="play" id="againBtn">Play Again</button>
+        </div>
+    </div>
+
+    <div class="legend">
+        <span>🐟 +1</span>
+        <span>🐠 +2</span>
+        <span>🦈 +5</span>
+        <span>🪼 &minus;2</span>
+        <span>🦀 &minus;1</span>
+    </div>
+
+    <a class="backlink" href="scratch.html">&larr; Back to my Panama City Beach page</a>
+
+<script>
+/* ===========================================================
+   CATCH OF THE DAY  -  game logic
+   ===========================================================
+   ▼▼▼  EASY SETTINGS — change these numbers to tune the game ▼▼▼ */
+
+const GAME_SECONDS = 30;     // how long each round lasts
+const SPAWN_EVERY  = 750;    // how often a new creature appears (milliseconds; smaller = more fish)
+const PLAYER_NAME  = "Dallas";
+
+// The sea creatures. emoji = what shows, points = score change,
+// weight = how often it appears (bigger number = more common),
+// minSpeed/maxSpeed = seconds to cross the screen (smaller = faster).
+const CREATURES = [
+    { emoji: "🐟", points: 1,  weight: 5, minSpeed: 3.5, maxSpeed: 6 },
+    { emoji: "🐠", points: 2,  weight: 3, minSpeed: 3,   maxSpeed: 5 },
+    { emoji: "🦈", points: 5,  weight: 1, minSpeed: 1.6, maxSpeed: 2.4 },
+    { emoji: "🪼", points: -2, weight: 2, minSpeed: 4,   maxSpeed: 6 },
+    { emoji: "🦀", points: -1, weight: 2, minSpeed: 4,   maxSpeed: 7 },
+];
+
+/* ▲▲▲  end of easy settings  ▲▲▲
+   =========================================================== */
+
+// Grab the parts of the page we need to talk to.
+const ocean      = document.getElementById("ocean");
+const scoreEl    = document.getElementById("score");
+const timeEl     = document.getElementById("time");
+const bestEl     = document.getElementById("best");
+const startScreen= document.getElementById("startScreen");
+const endScreen  = document.getElementById("endScreen");
+const endTitle   = document.getElementById("endTitle");
+const endMsg     = document.getElementById("endMsg");
+
+let score, timeLeft, best = 0;
+let spawnTimer, countdownTimer;
+let playing = false;
+
+// Pick a creature at random, but respect the "weight" (rarity).
+function pickCreature() {
+    const pool = [];
+    CREATURES.forEach(c => {
+        for (let i = 0; i < c.weight; i++) pool.push(c);
+    });
+    return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// Make one creature swim across the ocean.
+function spawnCreature() {
+    if (!playing) return;
+
+    const c = pickCreature();
+    const critter = document.createElement("button");
+    critter.className = "critter";
+    critter.textContent = c.emoji;
+
+    // random vertical position (keep it inside the water, above the sand)
+    const top = 20 + Math.random() * 330;
+    critter.style.top = top + "px";
+    critter.style.left = "100%";   // start just off the right edge
+
+    // random speed
+    const speed = c.minSpeed + Math.random() * (c.maxSpeed - c.minSpeed);
+
+    ocean.appendChild(critter);
+
+    // animate it swimming from right to left
+    const swim = critter.animate(
+        [ { left: "100%" }, { left: "-60px" } ],
+        { duration: speed * 1000, easing: "linear" }
+    );
+
+    // if it reaches the far side uncaught, remove it
+    swim.onfinish = () => critter.remove();
+
+    // catching it!
+    critter.addEventListener("click", () => {
+        if (!playing) return;
+        changeScore(c.points, critter, c.points >= 0);
+        critter.remove();
+    });
+}
+
+// Update the score and show a floating +/- number.
+function changeScore(points, critter, good) {
+    score += points;
+    if (score < 0) score = 0;          // don't go negative
+    scoreEl.textContent = score;
+
+    const popup = document.createElement("div");
+    popup.className = "popup";
+    popup.textContent = (points > 0 ? "+" : "") + points;
+    popup.style.color = good ? "#aef0c4" : "#ffb3a1";
+    popup.style.left = critter.style.left;
+    popup.style.top  = critter.style.top;
+    ocean.appendChild(popup);
+    setTimeout(() => popup.remove(), 700);
+}
+
+// Start a fresh round.
+function startGame() {
+    score = 0;
+    timeLeft = GAME_SECONDS;
+    playing = true;
+
+    scoreEl.textContent = score;
+    timeEl.textContent = timeLeft;
+    startScreen.classList.add("hidden");
+    endScreen.classList.add("hidden");
+
+    spawnTimer = setInterval(spawnCreature, SPAWN_EVERY);
+
+    countdownTimer = setInterval(() => {
+        timeLeft--;
+        timeEl.textContent = timeLeft;
+        if (timeLeft <= 0) endGame();
+    }, 1000);
+}
+
+// End the round and show the results.
+function endGame() {
+    playing = false;
+    clearInterval(spawnTimer);
+    clearInterval(countdownTimer);
+
+    // clear any creatures still on screen
+    document.querySelectorAll(".critter").forEach(el => el.remove());
+
+    if (score > best) {
+        best = score;
+        bestEl.textContent = best;
+    }
+
+    // a friendly message that changes with how well you did
+    let title, msg;
+    if (score >= 30)      { title = "🏆 Master Angler!"; msg = PLAYER_NAME + ", that was an incredible haul of " + score + " points!"; }
+    else if (score >= 15) { title = "🎣 Nice catch!";    msg = "Solid fishing, " + PLAYER_NAME + " — you scored " + score + " points."; }
+    else                  { title = "🌊 Time's up!";     msg = "You scored " + score + " points. The fish were quick today!"; }
+
+    endTitle.textContent = title;
+    endMsg.textContent = msg;
+    endScreen.classList.remove("hidden");
+}
+
+// hook up the buttons
+document.getElementById("startBtn").addEventListener("click", startGame);
+document.getElementById("againBtn").addEventListener("click", startGame);
+</script>
+
+</body>
+</html>
